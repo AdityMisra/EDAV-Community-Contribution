@@ -1,0 +1,146 @@
+---
+title: "Community Contribution CC-11"
+format: html
+editor: visual
+---
+
+## Quantmod Package Demo
+
+`Quantmod` stands for *Quantitative Financial Modelling Framework*, and it's designed to make financial modeling, data retrieval, and visualization much easier. `quantmod` is also a powerful tool for anyone working with time series data.
+
+Features of `quantmod`:
+
+1.  **Easy Data Access**: `Quantmod` can pull data directly from sources like Yahoo Finance, Google, and other APIs. So, you can bring in live or historical data into R with just a few lines of code.
+
+2.  **Built-in Indicators**: The package comes with a range of popular technical indicators—like moving averages, RSI, MACD, and more—making it easier to explore patterns, trends, and momentum in your data.
+
+3.  **Quick Visualization**: With just a few commands, highly customizable charts and visualizations can be created. This is especially useful for identifying trends and patterns over time.
+
+## Running Code
+
+```{r}
+#install.packages("quantmod")
+library(quantmod)
+```
+
+-   **Defining Date Range**: `start_date` is set to 3 years before today, and `end_date` is today’s date.
+
+-   **Fetching Data**: `getSymbols()` retrieves data for the specified date range.
+
+```{r}
+start_date <- Sys.Date() - 3*365  # Approximate 3 years
+end_date <- Sys.Date()
+
+getSymbols(c("AAPL", "NVDA"), src = "yahoo", from = start_date, to = end_date)
+
+head(AAPL)
+head(NVDA)
+
+```
+
+**Calculating Daily Returns**: Calculate daily returns and merge them for side-by-side comparison.
+
+```{r}
+# Calculate daily returns
+daily_returns_AAPL <- dailyReturn(AAPL$AAPL.Close)
+daily_returns_NVDA <- dailyReturn(NVDA$NVDA.Close)
+
+# Merge the daily returns into a single data frame
+combined_daily_returns <- merge(daily_returns_AAPL, daily_returns_NVDA, all = FALSE)
+colnames(combined_daily_returns) <- c("AAPL", "NVDA")
+
+```
+
+This code is using the `quantmod` package in R to create charts of closing prices for two stocks, Apple (AAPL) and NVIDIA (NVDA).
+
+```{r}
+chartSeries(AAPL, name = "Apple (AAPL) Closing Prices", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addSMA(n = 50, col = "blue")
+addSMA(n = 200, col = "red")
+
+chartSeries(NVDA, name = "NVIDIA (NVDA) Closing Prices", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addSMA(n = 50, col = "blue")
+addSMA(n = 200, col = "red")
+```
+
+**Bollinger Bands** are a valuable tool for visualizing the price "boundaries," using which traders and analysts can make more informed decisions about when a stock might be overbought or oversold.
+
+```{r}
+chartSeries(AAPL, name = "Apple with Bollinger Bands", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addBBands(n = 20, sd = 2)
+
+chartSeries(NVDA, name = "NVIDIA with Bollinger Bands", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addBBands(n = 20, sd = 2)
+```
+
+**Exponential Moving Average (EMA)**:
+
+-   EMA is more sensitive to recent price changes than a simple moving average, as it applies more weight to recent data points.
+
+-   Here, we use a 20-day EMA to highlight the recent price trend in AAPL’s data.
+
+```{r}
+chartSeries(AAPL, name = "Apple (AAPL) with 20-Day EMA", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addEMA(n = 20, col = "purple")  # 20-day EMA
+
+chartSeries(NVDA, name = "NVIDIA (NVDA) with 20-Day EMA", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addEMA(n = 20, col = "purple")  # 20-day EMA
+```
+
+**Relative Strength Index (RSI)**:
+
+-   RSI ranges between 0 and 100 and is commonly interpreted as overbought when above 70 and oversold when below 30.
+
+-   This metric can help identify potential reversal points in price trends.
+
+```{r}
+chartSeries(AAPL, name = "Apple (AAPL) with RSI", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addRSI(n = 14)  # 14-day RSI
+
+chartSeries(NVDA, name = "NVIDIA (NVDA) with RSI", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addRSI(n = 14)  # 14-day RSI
+```
+
+**Moving Average Convergence Divergence (MACD)**:
+
+-   MACD is calculated by subtracting the 26-period EMA from the 12-period EMA.
+
+-   The signal line is a 9-day EMA of the MACD line, and the histogram shows the difference between MACD and the signal line.
+
+-   Crossings of the MACD line and signal line can indicate potential buy or sell signals.
+
+```{r}
+chartSeries(AAPL, name = "Apple (AAPL) with MACD", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addMACD(fast = 12, slow = 26, signal = 9, col = c("blue", "red", "green"))
+
+chartSeries(AAPL, name = "NVIDIA (NVDA) with MACD", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addMACD(fast = 12, slow = 26, signal = 9, col = c("blue", "red", "green"))
+```
+
+-   **Rate of Change (ROC)**:
+
+    -   ROC shows the speed at which the price is changing, giving insight into momentum shifts.
+
+    -   Positive ROC values indicate upward momentum, while negative values indicate downward momentum.
+
+```{r}
+chartSeries(AAPL, name = "Apple (AAPL) with ROC", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addROC(n = 10, col = "orange")  # 10-day Rate of Change
+
+chartSeries(NVDA, name = "NVIDIA (NVDA) with ROC", subset = paste0(start_date, "::", end_date), theme = chartTheme("white"))
+addROC(n = 10, col = "orange")  # 10-day Rate of Change
+```
+
+**Cumulative Returns**:
+
+-   This cumulative metric demonstrates how much a hypothetical investment would have grown (or shrunk) over the observed period.
+
+-   Using `cumprod`, we calculate the cumulative return based on daily returns.
+
+```{r}
+cumulative_returns_AAPL <- cumprod(1 + dailyReturn(AAPL$AAPL.Close)) - 1
+plot(cumulative_returns_AAPL, main = "Cumulative Returns: Apple (AAPL)", col = "darkgreen", ylab = "Cumulative Returns", xlab = "Date")
+
+cumulative_returns_NVDA <- cumprod(1 + dailyReturn(NVDA$NVDA.Close)) - 1
+plot(cumulative_returns_NVDA, main = "Cumulative Returns: NVIDIA (NVDA)", col = "darkgreen", ylab = "Cumulative Returns", xlab = "Date")
+```
